@@ -1,0 +1,12 @@
+
+
+
+build
+cmake-build-debug
+cmake-build-release
+
+document.pdf
+grab
+grab.cpp
+
+.idea
