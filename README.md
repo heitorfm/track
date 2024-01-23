@@ -1,7 +1,7 @@
 
 # Track
 
-## CLI utility to find resources usage information and running time about a program ou command
+1. # CLI utility to find resources usage information and running time about a program ou command
 
 ### 1. Only for linux for now.
 ### 2. Depends on fmt. So: `sudo apt install libfmt-dev`
@@ -14,7 +14,12 @@
 3. `cmake -G "Unix Makefiles" ..`
 4. `make`
 
-### Ready! now you have a `track` executable on the root folder of the project. Put it on your path.
+### Ready! now you have a `track` executable on the root folder of the project. Put it on your path. Use it and be happy !
+
+### `track --help`
+
+### `track ls -la`
+
 
 ##
 
