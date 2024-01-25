@@ -1,7 +1,7 @@
 
 # Track
 
-1. # CLI utility to find resources usage information and running time about a program ou command
+1. # CLI utility to find resources usage information and running time of a program or command
 
 ### 1. Only for linux for now.
 ### 2. Depends on fmt. So: `sudo apt install libfmt-dev`
