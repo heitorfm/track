@@ -30,13 +30,11 @@
 #include "TargetCommandStats.hpp"
 #include "InputParams.hpp"
 
-using namespace std;
-
 class Reporter {
 
 public:
-	static void printResult(InputParams* inputParams, stringstream& timer, TargetCommandStats* cmdStats);
-	static void makeTimerLine(stringstream& ss, TargetCommandStats* cmdStats);
+	static void printResult(InputParams& inputParams, stringstream& timer, TargetCommandStats& cmdStats);
+	static void makeTimerLine(stringstream& ss, TargetCommandStats& cmdStats);
 	static void printRUsage(rusage ru);
 };
 

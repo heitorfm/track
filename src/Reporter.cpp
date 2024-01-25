@@ -26,9 +26,9 @@
 #include <iostream>
 #include "Reporter.hpp"
 
-void Reporter::makeTimerLine(stringstream& timer, TargetCommandStats* cmdStats) {
+void Reporter::makeTimerLine(stringstream& timer, TargetCommandStats& cmdStats) {
 
-	long nanos = cmdStats->elapsed;
+	long nanos = cmdStats.elapsed;
 
 	int micros = nanos / 1000;
 	nanos %= 1000;
@@ -85,36 +85,36 @@ void Reporter::printRUsage(rusage ru) {
 
 }
 
-void Reporter::printResult(InputParams* inputParams, stringstream& timer, TargetCommandStats* cmdStats) {
+void Reporter::printResult(InputParams& inputParams, stringstream& timer, TargetCommandStats& cmdStats) {
 
-	for(int i = 0; i < inputParams->targetArgsSize; i++) {
-		cout << inputParams->targetArgs[i] << " ";
+	for(int i = 0; i < inputParams.targetArgsSize; i++) {
+		cout << inputParams.targetArgs[i] << " ";
 	}
 	cout << '\n';
 
-	if(!inputParams->selective || inputParams->timer) {
+	if(!inputParams.selective || inputParams.timer) {
 		fmt::print(fg(fmt::color::white), "-----------------------------------------------------------\n");
 		cout << timer.str().c_str();
 		fmt::print(fg(fmt::color::white), "-----------------------------------------------------------\n");
-		fmt::print(fg(fmt::rgb(50, 250, 150)), "{: <15} {} micros\n", "System Time:", cmdStats->usage.ru_stime.tv_usec);
-		fmt::print(fg(fmt::rgb(50, 250, 150)), "{: <15} {} micros\n", "User Time:", cmdStats->usage.ru_utime.tv_usec);
+		fmt::print(fg(fmt::rgb(50, 250, 150)), "{: <15} {} micros\n", "System Time:", cmdStats.usage.ru_stime.tv_usec);
+		fmt::print(fg(fmt::rgb(50, 250, 150)), "{: <15} {} micros\n", "User Time:", cmdStats.usage.ru_utime.tv_usec);
 	}
-	if(!inputParams->selective || inputParams->mem) {
+	if(!inputParams.selective || inputParams.mem) {
 		fmt::print(fg(fmt::color::white), "-----------------------------------------------------------\n");
-		fmt::print(fg(fmt::rgb(50, 150, 250)), "{: <15} {} K\n", "Max Memory:", cmdStats->usage.ru_maxrss);
-		fmt::print(fg(fmt::rgb(50, 150, 250)), "{: <15} {}\n", "Swaps:", cmdStats->usage.ru_nswap);
+		fmt::print(fg(fmt::rgb(50, 150, 250)), "{: <15} {} K\n", "Max Memory:", cmdStats.usage.ru_maxrss);
+		fmt::print(fg(fmt::rgb(50, 150, 250)), "{: <15} {}\n", "Swaps:", cmdStats.usage.ru_nswap);
 	}
-	if(!inputParams->selective || inputParams->cpu) {
+	if(!inputParams.selective || inputParams.cpu) {
 		fmt::print(fg(fmt::color::white), "-----------------------------------------------------------\n");
-		fmt::print(fg(fmt::color::aquamarine), "{: <15} {}\n", "Involuntary context switches:", cmdStats->usage.ru_nivcsw);
-		fmt::print(fg(fmt::color::aquamarine), "{: <15} {}\n", "Voluntary context switches:", cmdStats->usage.ru_nvcsw);
+		fmt::print(fg(fmt::color::aquamarine), "{: <15} {}\n", "Involuntary context switches:", cmdStats.usage.ru_nivcsw);
+		fmt::print(fg(fmt::color::aquamarine), "{: <15} {}\n", "Voluntary context switches:", cmdStats.usage.ru_nvcsw);
 	}
-	if(!inputParams->selective || inputParams->io) {
+	if(!inputParams.selective || inputParams.io) {
 		fmt::print(fg(fmt::color::white), "-----------------------------------------------------------\n");
-		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Page Reclaims:", cmdStats->usage.ru_minflt);
-		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Page Faults:", cmdStats->usage.ru_majflt);
-		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Block input operations:", cmdStats->usage.ru_inblock);
-		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Block output operations:", cmdStats->usage.ru_oublock);
+		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Page Reclaims:", cmdStats.usage.ru_minflt);
+		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Page Faults:", cmdStats.usage.ru_majflt);
+		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Block input operations:", cmdStats.usage.ru_inblock);
+		fmt::print(fg(fmt::rgb(230, 175, 46)), "{: <15} {}\n", "Block output operations:", cmdStats.usage.ru_oublock);
 	}
 	fmt::print(fg(fmt::color::white), "-----------------------------------------------------------\n");
 

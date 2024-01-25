@@ -42,48 +42,48 @@ using namespace std::chrono;
  * Parses the program input
  * @param inputParams struct used to store the parsed params
  */
-void Tracker::parseCommandLine(InputParams* inputParams) {
+void Tracker::parseCommandLine(InputParams& inputParams) {
 
-	if(inputParams->argc < 2) {
+	if(inputParams.argc < 2) {
 		throw NeedsHelpException("Target command to track must be provided");
 	}
 
 	int startIdx = -1;
-	for(int i = 1; i < inputParams->argc; i++) {
-		if(startIdx < 0 && inputParams->argv[i][0] != '-') { // start index for the target command
+	for(int i = 1; i < inputParams.argc; i++) {
+		if(startIdx < 0 && inputParams.argv[i][0] != '-') { // start index for the target command
 			startIdx = i;
 		}
-		char* cur = &inputParams->argv[i][0];
+		char* cur = &inputParams.argv[i][0];
 		if(flags::hasFlag(cur, flags::help)) {
 			throw NeedsHelpException();
 		}
 		if(flags::hasFlag(cur, flags::timer)) {
-			inputParams->selective = true;
-			inputParams->timer = true;
+			inputParams.selective = true;
+			inputParams.timer = true;
 		} else
 		if(flags::hasFlag(cur, flags::cpu)) {
-			inputParams->selective = true;
-			inputParams->cpu = true;
+			inputParams.selective = true;
+			inputParams.cpu = true;
 		} else
 		if(flags::hasFlag(cur, flags::mem)) {
-			inputParams->selective = true;
-			inputParams->mem = true;
+			inputParams.selective = true;
+			inputParams.mem = true;
 		} else
 		if(flags::hasFlag(cur, flags::io)) {
-			inputParams->selective = true;
-			inputParams->io = true;
-		} else if(inputParams->argv[i][0] == '-' && startIdx < 0) {
+			inputParams.selective = true;
+			inputParams.io = true;
+		} else if(inputParams.argv[i][0] == '-' && startIdx < 0) {
 			cerr << "flag not found: " << cur << "\n";
 			throw NeedsHelpException();
 		};
 	}
 
-	inputParams->targetArgsSize = inputParams->argc - startIdx;
-	inputParams->targetArgs = reinterpret_cast<char**>(new char[inputParams->targetArgsSize + 1][100]);
-	for(int i = 0; i < inputParams->targetArgsSize; i++) {
-		inputParams->targetArgs[i] = inputParams->argv[startIdx + i];
+	inputParams.targetArgsSize = inputParams.argc - startIdx;
+	inputParams.targetArgs = reinterpret_cast<char**>(new char[inputParams.targetArgsSize + 1][100]);
+	for(int i = 0; i < inputParams.targetArgsSize; i++) {
+		inputParams.targetArgs[i] = inputParams.argv[startIdx + i];
 	}
-	inputParams->targetArgs[inputParams->targetArgsSize] = NULL;
+	inputParams.targetArgs[inputParams.targetArgsSize] = NULL;
 
 }
 
@@ -91,23 +91,25 @@ void Tracker::parseCommandLine(InputParams* inputParams) {
  * Acquire target and proceed to tracking
  * @param inputParams parsed input params
  */
-void Tracker::track(InputParams* inputParams) {
+void Tracker::track(InputParams& inputParams) {
 
 	int pipeId[2];
-	pipe(pipeId);
+	int successPipe = pipe(pipeId);
+	if(successPipe == -1) throw ExecutionError(strerror(errno));
 
-	TargetCommandStats* cmdStats = new TargetCommandStats;
+	TargetCommandStats cmdStats;
 
 	this->execute(pipeId, inputParams, cmdStats);
 
 	this->gatherResults(pipeId, cmdStats);
 
+	close(pipeId[0]);
+	close(pipeId[1]);
+
 	stringstream timer;
 	Reporter::makeTimerLine(timer, cmdStats);
 
 	Reporter::printResult(inputParams, timer, cmdStats);
-
-	delete cmdStats;
 
 }
 
@@ -118,7 +120,7 @@ void Tracker::track(InputParams* inputParams) {
  * @param cmdStats struct with the results
  * @return the pid of the child process
  */
-pid_t Tracker::execute(int pipeId[2], InputParams* inputParams, TargetCommandStats* cmdStats) {
+pid_t Tracker::execute(int pipeId[2], InputParams& inputParams, TargetCommandStats& cmdStats) {
 
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -127,10 +129,10 @@ pid_t Tracker::execute(int pipeId[2], InputParams* inputParams, TargetCommandSta
 		long startNanosPure = steady_clock::now().time_since_epoch().count();
 		write(pipeId[1], &startNanosPure, sizeof(long));
 
-		int res = execvp(inputParams->targetArgs[0], (char**) inputParams->targetArgs);
+		int res = execvp(inputParams.targetArgs[0], (char**) inputParams.targetArgs);
 
 		if(res == -1) {
-			perror(*inputParams->targetArgs);
+			perror(*inputParams.targetArgs);
 			exit(EXIT_FAILURE);
 		}
 	} else if(pid < 0) { // cannot fork
@@ -142,7 +144,7 @@ pid_t Tracker::execute(int pipeId[2], InputParams* inputParams, TargetCommandSta
 	int res = waitpid(pid, &childStatus, 0);
 
 	// get end time
-	cmdStats->finish = steady_clock::now().time_since_epoch().count();
+	cmdStats.finish = steady_clock::now().time_since_epoch().count();
 
 	if(WEXITSTATUS(childStatus) == EXIT_FAILURE) { // internal error on the child process
 		throw ExecutionError();
@@ -160,13 +162,13 @@ pid_t Tracker::execute(int pipeId[2], InputParams* inputParams, TargetCommandSta
  * @param pipeId the id to be used get the start time from
  * @param cmdStats struct with the results
  */
-void Tracker::gatherResults(int pipeId[2], TargetCommandStats* cmdStats) {
+void Tracker::gatherResults(int pipeId[2], TargetCommandStats& cmdStats) {
 
-	read(pipeId[0], &cmdStats->start, sizeof(long));
+	read(pipeId[0], &cmdStats.start, sizeof(long));
 
-	cmdStats->elapsed = cmdStats->finish - cmdStats->start;
+	cmdStats.elapsed = cmdStats.finish - cmdStats.start;
 
-	int retRu = getrusage(RUSAGE_CHILDREN, &cmdStats->usage);
+	int retRu = getrusage(RUSAGE_CHILDREN, &cmdStats.usage);
 	if(retRu == -1) {
 		cout << strerror(errno) << "\n";
 	}

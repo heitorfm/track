@@ -28,8 +28,6 @@
 #include <exception>
 #include <utility>
 
-using namespace std;
-
 class NeedsHelpException: public exception {
 private:
 	string message;

@@ -31,7 +31,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-	InputParams* inputParams = new InputParams{.argc = argc, .argv = argv};
+	InputParams inputParams{.argc = argc, .argv = argv};
 
 	Tracker tracker;
 
@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
 		cout << err.what() << "\n";
 	}
 
-	delete[] inputParams->targetArgs;
-	delete inputParams;
+	delete[] inputParams.targetArgs;
+
 
 	return 0;
 }

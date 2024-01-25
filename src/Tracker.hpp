@@ -29,18 +29,16 @@
 #include "TargetCommandStats.hpp"
 #include "InputParams.hpp"
 
-using namespace std;
-
 class Tracker {
 
 private:
 
 public:
 	Tracker() = default;
-	void parseCommandLine(InputParams* inputParams);
-	void track(InputParams* inputParams);
-	pid_t execute(int pipeId[2], InputParams* inputParams, TargetCommandStats* cmdStats);
-	void gatherResults(int pipeId[2], TargetCommandStats* cmdStats);
+	void parseCommandLine(InputParams& inputParams);
+	void track(InputParams& inputParams);
+	pid_t execute(int pipeId[2], InputParams& inputParams, TargetCommandStats& cmdStats);
+	void gatherResults(int pipeId[2], TargetCommandStats& cmdStats);
 	void printHelp();
 };
 

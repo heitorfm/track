@@ -28,8 +28,6 @@
 #include <exception>
 #include <utility>
 
-using namespace std;
-
 class ExecutionError: public exception {
 
 private:
